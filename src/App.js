@@ -1,8 +1,9 @@
+
 import { useState, useEffect } from "react";
 import "./App.css";
 
 function App() {
-  const initialValues = { username: "", email: "", password: "" , room1:"", room2:""};
+  const initialValues = { username: "", email: "", password: "", PhoneNo: "", gender: "", source: "", destination: "", totalfair: "" };
   const [formValues, setFormValues] = useState(initialValues);
   const [formErrors, setFormErrors] = useState({});
   const [isSubmit, setIsSubmit] = useState(false);
@@ -23,6 +24,34 @@ function App() {
     setFormValues({ ...formValues, [name]: id });
 
   };
+
+
+
+  const calculateTotalFare = () => {
+    // Implement your logic to calculate total fare here
+    // For demonstration purposes, let's assume a simple fare calculation
+    const fareMap = {
+      Mumbai: { Delhi: 5000, Jaipur: 4000, Hubli: 3000, Goa: 2000 },
+      Pune: { Delhi: 6000, Jaipur: 4500, Hubli: 3500, Goa: 2500 },
+      Patna: { Delhi: 7000, Jaipur: 5000, Hubli: 4000, Goa: 3000 },
+      Ranchi: { Delhi: 5500, Jaipur: 4200, Hubli: 3200, Goa: 2300 },
+    };
+
+    const { source, destination } = formValues;
+    if (source && destination && fareMap[source] && fareMap[source][destination]) {
+      return fareMap[source][destination];
+    }
+
+    return 0; // Default fare if source or destination is not selected
+  };
+
+  
+  useEffect(() => {
+    // Update the total fare whenever source or destination changes
+    const fare = calculateTotalFare();
+    setFormValues((prevValues) => ({ ...prevValues, totalfair: fare }));
+  }, [formValues.source, formValues.destination]);
+
 
   useEffect(() => {
     console.log(formErrors);
@@ -57,32 +86,28 @@ function App() {
     if (!values.gender) {
       errors.gender = "Please select a gender!";
     }
-    if (values.country === "default") {
-      errors.country = "Please select a country!";
+    if (!values.source || values.source === "default") {
+      errors.source = "Please select a source!";
     }
-    if (values.room2.length === 0 && values.room1.length === 0) {
-      errors.rooms = "Please select at least one option!";
+    if (!values.destination || values.destination === "default") {
+      errors.destination = "Please select a destination!";
     }
+    // if (values.room2.length === 0 && values.room1.length === 0) {
+    //   errors.rooms = "Please select at least one option!";
+    // }
     return errors;
   };
 
   return (
     <div className="container">
-      {Object.keys(formErrors).length === 0 && isSubmit ? (
-        <div>
-          {alert('Login Successful')}
-          <pre>{JSON.stringify(formValues, undefined, 2)}</pre>
-        </div>
-      ) : (
-        <div className="ui message success">First Fill The Form!!</div>
-      )}
+
 
       <form onSubmit={handleSubmit}>
-        <h1>Hotel Booking Registration Form</h1>
+        <h1>Airline Reservation System</h1>
         <div className="ui divider"></div>
         <div className="ui form">
           <div className="field">
-            <label>Username</label>
+            <label>Username: </label>
             <input
               type="text"
               name="username"
@@ -94,7 +119,7 @@ function App() {
           <p>{formErrors.username}</p>
 
           <div className="field">
-            <label>Password</label>
+            <label>Password: </label>
             <input
               type="password"
               name="password"
@@ -105,7 +130,7 @@ function App() {
           </div>
           <p>{formErrors.password}</p>
           <div className="field">
-            <label>Email</label>
+            <label>Email: </label>
             <input
               type="text"
               name="email"
@@ -116,7 +141,7 @@ function App() {
           </div>
           <p>{formErrors.email}</p>
           <div className="field">
-            <label>PhoneNo</label>
+            <label>PhoneNo: </label>
             <input
               type="number"
               name="PhoneNo"
@@ -147,21 +172,36 @@ function App() {
           </div>
           <p>{formErrors.gender}</p>
           <div className="field">
-            <label>Country</label>
+            <label>Source: </label>
             <select
-              name="country"
-              value={formValues.country}
+              name="source"
+              value={formValues.source}
               onChange={handleChange}
             >
-              <option value="default" selected>(Select your country)</option>
-              <option value="India">India</option>
-              <option value="USA">USA</option>
-              <option value="Japan">Japan</option>
-              <option value="UK">UK</option>
+              <option value="default" selected>(Select your source)</option>
+              <option value="Mumbai">Mumbai</option>
+              <option value="Pune">Pune</option>
+              <option value="Patna">Patna</option>
+              <option value="Ranchi">Ranchi</option>
             </select>
           </div>
-          <p>{formErrors.country}</p>
+          <p>{formErrors.source}</p>
           <div className="field">
+            <label>Destination: </label>
+            <select
+              name="destination"
+              value={formValues.destination}
+              onChange={handleChange}
+            >
+              <option value="default" selected>(Select your destination)</option>
+              <option value="Delhi">Delhi</option>
+              <option value="Jaipur">Jaipur</option>
+              <option value="Hubli">Hubli</option>
+              <option value="Goa">Goa</option>
+            </select>
+          </div>
+          <p>{formErrors.destination}</p>
+          { /*    <div className="field">
             <label>Rooms</label>
             <div>
               <label htmlFor="twoBedroom">Two Bedroom</label>
@@ -181,17 +221,51 @@ function App() {
                 value="fourBedroom"
                 checked={formValues.room2 === "fourBedroom"}
                 onChange={handleChange}
-              />
-            </div>
+              />                             
+            </div> 
+            </div>    
+          <p>{formErrors.rooms}</p>      */}
+          <div className="field">
+            <label>Total Fare: </label>
+            <input
+              type="text"
+              name="totalfair"
+              value={formValues.totalfair}
+              readOnly // Make it read-only
+            />
           </div>
-          <p>{formErrors.rooms}</p>
 
           <button className="fluid ui button blue">Submit</button>
         </div>
       </form >
+
+      {Object.keys(formErrors).length === 0 && isSubmit ? (
+        <div>
+          {alert('Login Successful')}
+          <div className="registration message success">{formValues.username} have registered successfully</div>
+          <div className="username">Username: {formValues.username}</div>
+          <div className="password">Password: {formValues.password}</div>
+          <div className="username">Email: {formValues.email}</div>
+          <div className="password">PhoneNo: {formValues.PhoneNo}</div>
+          <div className="username">Gender: {formValues.gender}</div>
+          <div className="password">Source: {formValues.source}</div>
+          <div className="username">Destination: {formValues.destination}</div>
+          <div className="password">Total Fare: {formValues.totalfair}</div>
+       {/*   <pre>{JSON.stringify(formValues, undefined, 2)}</pre>    */}
+        </div>
+      ) : (
+        <div className="ui message success">First Fill The Form!!</div>
+      )}
+
     </div >
   );
 }
 
 export default App;
+
+
+
+
+
+
 
